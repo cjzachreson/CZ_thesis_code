@@ -2,14 +2,25 @@
 //  main.cpp
 //  PA_18_01_16
 //
-//  Created by 11678505 on 18/01/2016.
+//  Created by 11678505 on 18/01/2016. 
 //  Copyright (c) 2016 11678505. All rights reserved.
-/* 
- this version of the code will scale k and beta with gamma in a "maleability" type argument;
- the supposition is that a weaker substratum (lower gamma_s) will be more easily deformed by
- bacteria (higher k_s) and will also reform more quickly due to capillary action agains the coverslip (higher beta)
- */
-//#include <mkl.h>
+// this code was written by Cameron Zachreson (11678505 was my UTS student ID number)
+/* This script simulates surface-motile bacteria that secrete EPS trails
+the code outputs a matrix of position, orientation, and length data for N bacteria in the following format:
+X1(t = 1), Y1(t = 1); theta1(t = 1); length1(t = 1); X1(t = 2); Y1(t = 2); theta1(t = 2); length1(t = 2);... length1(tf)
+X2(t = 1), Y2(t = 1); theta2(t = 1); length2(t = 1); X2(t = 2); Y2(t = 2); theta2(t = 2); length2(t = 2);... length2(tf)
+.
+.
+.
+XN(t = 1), YN(t = 1); thetaN(t = 1); lengthN(t = 1); XN(t = 2); YN(t = 2); thetaN(t = 2); lengthN(t = 2);... lengthN(tf)
+
+this matrix can be read by the XYTL class for analysis in the .m files provided.
+
+the script also creates text files containing the values of each pixel in the stigmergy grid 
+the frequency of data recording can be set by changing d_rec
+*/
+
+
 #include <cstdlib>
 #include <algorithm>
 #include <random>
@@ -19,7 +30,7 @@
 #include <sstream>
 
 #include <array>
-
+// the main scrip needs these headers to run, change the script below as appropriate
 #include "/home/cjzachre/Documents/EPS_only/script/headers/general_functions.h"
 #include "/home/cjzachre/Documents/EPS_only/script/headers/bins_class.h"
 #include "/home/cjzachre/Documents/EPS_only/script/headers/stigmergy_grid_EPS_only_class.h"
@@ -28,7 +39,7 @@
 #include "/home/cjzachre/Documents/EPS_only/script/headers/output_matrix_class.h"
 
 int main(int argc, const char * argv[]) {
-    
+    // set directory where data will be saved
     string output_directory = "/home/cjzachre/Documents/EPS_only/output_tf_50k/";
     mkdir(output_directory.c_str(), 0777);
     
@@ -39,33 +50,33 @@ int main(int argc, const char * argv[]) {
     
     srand(seed);//for uniform distributions
     
-    double s_SG = 0.25;
+    double s_SG = 0.25; // pixel resolution for stigmergy grid
     
-    // top level parameter is mean reversal period, for each value, iterate through gamma_s values
+    // reversal period and standard deviation for gaussian distribution
     double mean_reversal_period = 1000;
     double stdev_reversal_period = mean_reversal_period / 5;
     
-
+    // population
     int N = 125;
-
+    // maximum retraction period tret
     double retraction_period = 10;
 
-
+    // naming output folder
     ostringstream label_lvl_1;
     label_lvl_1 << "Trev_" << mean_reversal_period << "_tret_" << retraction_period << "_N_" << N;
     string identifier_1 = label_lvl_1.str(); // name of the created folder
     
     string output_directory_lvl_1 = output_directory + identifier_1 + "/";
-    mkdir(output_directory_lvl_1.c_str(), 0777);
+    mkdir(output_directory_lvl_1.c_str(), 0777); // makes an output folder
     
     
 
-    double P_min = 0.1;
-    double P_max = 1.0;
-    double P_attach_particle = 0.0;
+    double P_min = 0.1; // minimum attachment probability
+    double P_max = 1.0; // maximum attachment probability
+    double P_attach_particle = 0.0; // pilus cross linking is disabled
 
-    double k_ps[] = {0.1, 0.05, 0.01, 0.005, 0.001};
-    double beta_ps[] = {0.005, 0.0005};
+    double k_ps[] = {0.1, 0.05, 0.01, 0.005, 0.001}; // deposition rate is systematically varied
+    double beta_ps[] = {0.005, 0.0005}; // degradation rate is systematically varied
 
     int n_ks = sizeof(k_ps)/sizeof(k_ps[0]);
     int n_betas = sizeof(beta_ps)/sizeof(beta_ps[0]);
@@ -93,25 +104,25 @@ for (int b_p_i = 0; b_p_i < n_betas; b_p_i++){
     double c_max = 1.0 * (s_SG * s_SG);
     double r0 = 1;
     
-    double Rep_const = 1;
+    double Rep_const = 1; // parameterizes repulsion potential, set to 0 to disable repulsion
     
     double aa = 1 / ( pow((13.0/7.0), (7.0/6.0)) * r0 );
     double bb = 1 / ( pow((13.0/7.0), (13.0/6.0)) * r0 );
     
     
-    double Eo = Rep_const / (12*(aa - bb));
+    double Eo = Rep_const / (12*(aa - bb)); // first derivative of Lennard-Jones potential
     
-    double F_max = 10;
+    double F_max = 10; // force cuttoff
     double Mu = 1;
     
-    double F_p = 1.5;
+    double F_p = 1.5; // pilus retraction force
     
     double l_min = 3.0;
     double w = 1;
     double l_max = 2 * l_min + w;
-    double s_CL = l_max + w;
+    double s_CL = l_max + w; // side length of subregions for cell-based neighbor lists
     
-    double phi = 0.5 * M_PI;
+    double phi = 0.5 * M_PI; // angular pilus range
     double l_pil = l_min;
     
     normal_distribution<double> T_rev_dist(mean_reversal_period, stdev_reversal_period);
@@ -121,24 +132,24 @@ for (int b_p_i = 0; b_p_i < n_betas; b_p_i++){
     double T_rev_min = max(0.0, mean_reversal_period - 4 * stdev_reversal_period);
     
     
-    double L = s_CL * 14;
-    double Ls_x = L;
+    double L = s_CL * 14; // system side length, even multiple of s_CL
+    double Ls_x = L; // source region, where cells are initially placed
     double Ls_y = L;
     
     
-    double dt_max = 0.1;
-    double dt_min = 0.005;
+    double dt_max = 0.1; // maximum allowed time step
+    double dt_min = 0.005; // minimum allowed time step
     double dt = dt_max; // this will change to keep the maximum particle movement below dX_max or dTheta_max
     double t = 0.0;
     double tf = 50000;
     double big_num = 100000000;
     
-    double dX_max = 0.1;
-    double V_max = 0;
+    double dX_max = 0.1; // maximum allowed displacement
+    double V_max = 0; // this value will be reassigned each time step, the fastest velocity of any cell
     
-    double d_rec_XYTL = 20;
-    double d_rec_image = 1000;
-    double d_check = 1;
+    double d_rec_XYTL = 20; // recording interval for coordinates
+    double d_rec_image = 1000; // recording interval for stigmergy grid images
+    double d_check = 1; // interval at which neighbor lists are re-evaluated
         
     double t_last_rec_XYTL = 0;
     double t_last_rec_image = 0;
@@ -203,7 +214,7 @@ for (int b_p_i = 0; b_p_i < n_betas; b_p_i++){
     mkdir(dirname_p.c_str(), 0777);
     
     
-    //initialize output vectors for X, Y, theta
+    //initialize output vectors for X, Y, theta, length
     
     output_matrix X_Y_T_L(tf, d_rec_XYTL, N, 4);
     
