@@ -5,6 +5,21 @@
 //  Created by 11678505 on 18/01/2016.
 //  Copyright (c) 2016 11678505. All rights reserved.
 
+// this code was written by Cameron Zachreson (11678505 was my UTS student ID number)
+/* This script simulates surface-motile bacteria that secrete EPS trails and deform the local topography
+the code outputs a matrix of position, orientation, and length data for N bacteria in the following format:
+X1(t = 1), Y1(t = 1); theta1(t = 1); length1(t = 1); X1(t = 2); Y1(t = 2); theta1(t = 2); length1(t = 2);... length1(tf)
+X2(t = 1), Y2(t = 1); theta2(t = 1); length2(t = 1); X2(t = 2); Y2(t = 2); theta2(t = 2); length2(t = 2);... length2(tf)
+.
+.
+.
+XN(t = 1), YN(t = 1); thetaN(t = 1); lengthN(t = 1); XN(t = 2); YN(t = 2); thetaN(t = 2); lengthN(t = 2);... lengthN(tf)
+this matrix can be read by the XYTL class for analysis in the .m files provided.
+the script also creates text files containing the values of each pixel in the stigmergy grid for both the EPS and topography
+the frequency of data recording can be set by changing d_rec
+*/
+
+
 //#include <mkl.h>
 #include <cstdlib>
 #include <algorithm>
@@ -49,7 +64,7 @@ int main(int argc, const char * argv[]) {
     mkdir(output_directory_lvl_1.c_str(), 0777);
     
     
-    double gamma_s_coeffs[] = {1.6};
+    double gamma_s_coeffs[] = {1.6}; // modulates the topographical force
     
     int num_params = 1;
     
@@ -65,14 +80,16 @@ int main(int argc, const char * argv[]) {
     mkdir(output_directory_lvl_2.c_str(), 0777);
         
     double gamma_s = gamma_s_coeff / s_SG;
-    double gamma_l = 0.0 / s_SG;
+    double gamma_l = 0.0 / s_SG; // gamma_l is another environmental foce like gamma_s, 
+	    			 // but k_l and beta_l will be faster, (l stands for 'liquid')
+	    			 // gamma_l > 0 implements cell aggregation, this was not included in the thesis.
         
     double k_p = 0.1 * (s_SG * s_SG); //deposition rate per unit area
-    double k_l = 10 * (s_SG * s_SG);
+    double k_l = 10 * (s_SG * s_SG); //doesn't do anything unless gamma_l > 0
     double k_s = 0.05 * (s_SG * s_SG) * (1 / gamma_s_coeff);
         
     double beta_p = 0.0005; //exponential degradation constant
-    double beta_s = 0.00025 * (1 / gamma_s_coeff);
+    double beta_s = 0.00025 * (1 / gamma_s_coeff); // degradation constant for topographical trace
     double beta_l = 0.1;
     
     double c_max = 1.0 * (s_SG * s_SG);
