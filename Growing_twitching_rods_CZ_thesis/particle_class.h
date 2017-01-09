@@ -4,7 +4,9 @@
 //
 //  Created by 11678505 on 11/01/2016.
 //  Copyright (c) 2016 11678505. All rights reserved.
-//
+// this code was written by Cameron Zachreson (11678505 was my UTS student ID number)
+/* This class contains the characteristics of the rod-shaped particles representing bacteria
+*/
 
 #ifndef PA_11_01_16_particle_class_h
 #define PA_11_01_16_particle_class_h
@@ -386,7 +388,7 @@ void Particle::Repulsion(vector<Particle> & particles, const BINS & b, int i, do
         if (j != i  && call_ij)
         {
             // cout << j << endl;
-            
+            // Vega-Lago algorithm
             double dXP = wrap_vec(this->X, particles[j].X, Lx);
             double dYP = wrap_vec(this->Y, particles[j].Y, Ly);
             
@@ -431,7 +433,7 @@ void Particle::Repulsion(vector<Particle> & particles, const BINS & b, int i, do
                         break;
                         
                     }
-                    //else, rods are parallel and in side-on interaction
+                    //else, rods are parallel and in side-on interaction, CZ: correction to Vega-Lago
                     double XLanda1 = RijEUi + XLjD2 * sign(UiEUj);
                     double XLanda2 = RijEUi - XLjD2 * sign(UiEUj);
                     
