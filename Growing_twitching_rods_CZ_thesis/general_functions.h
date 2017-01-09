@@ -4,7 +4,9 @@
 //
 //  Created by 11678505 on 11/01/2016.
 //  Copyright (c) 2016 11678505. All rights reserved.
-//
+// this code was written by Cameron Zachreson (11678505 was my UTS student ID number)
+/* This class contains general use functions
+*/
 
 #ifndef PA_11_01_16_general_functions_h
 #define PA_11_01_16_general_functions_h
@@ -26,7 +28,7 @@ using namespace std;
 inline double rng()
 {
     /*
-     // Adopted from the old implementation of rand(3) in glibc.
+     // Christian Wolff: Adopted from the old implementation of rand(3) in glibc.
      // By no means acceptable for cryptography, but good enough for our
      // application and fast.
      this->rng_register_ = ((this->rng_register_ * 1103515245) + 12345) & 0x7fffffff;
