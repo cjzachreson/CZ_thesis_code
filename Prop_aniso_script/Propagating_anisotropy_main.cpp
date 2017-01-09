@@ -6,7 +6,20 @@
 
 //  Created by Cameron Zachreson on 25/08/2016.
 //  Copyright (c) 2016 11678505. All rights reserved.
-//
+
+// this code was written by Cameron Zachreson (11678505 was my UTS student ID number)
+/* This script simulates surface-motile bacteria that grow, divide, secrete EPS trails, and create 'furrows'
+the code outputs a matrix of position, orientation, and length data for N bacteria in the following format:
+X1(t = 1), Y1(t = 1); theta1(t = 1); length1(t = 1); X1(t = 2); Y1(t = 2); theta1(t = 2); length1(t = 2);... length1(tf)
+X2(t = 1), Y2(t = 1); theta2(t = 1); length2(t = 1); X2(t = 2); Y2(t = 2); theta2(t = 2); length2(t = 2);... length2(tf)
+.
+.
+.
+XN(t = 1), YN(t = 1); thetaN(t = 1); lengthN(t = 1); XN(t = 2); YN(t = 2); thetaN(t = 2); lengthN(t = 2);... lengthN(tf)
+this matrix can be read by the XYTL class for analysis in the .m files provided.
+the script also creates text files containing the values of each pixel in the stigmergy grids
+the frequency of data recording can be set by changing d_rec
+*/
 
 #include <cstdlib>
 #include <algorithm>
