@@ -5,7 +5,19 @@
 //  Created by 11678505 on 21/04/2016.
 //  Copyright (c) 2016 11678505. All rights reserved.
 //
-
+// this code was written by Cameron Zachreson (11678505 was my UTS student ID number)
+/* This script simulates surface-motile bacteria that grow (at a constant rate) and divide upon reaching a critical length
+the code outputs a matrix of position, orientation, and length data for N bacteria in the following format:
+X1(t = 1), Y1(t = 1); theta1(t = 1); length1(t = 1); X1(t = 2); Y1(t = 2); theta1(t = 2); length1(t = 2);... length1(tf)
+X2(t = 1), Y2(t = 1); theta2(t = 1); length2(t = 1); X2(t = 2); Y2(t = 2); theta2(t = 2); length2(t = 2);... length2(tf)
+.
+.
+.
+XN(t = 1), YN(t = 1); thetaN(t = 1); lengthN(t = 1); XN(t = 2); YN(t = 2); thetaN(t = 2); lengthN(t = 2);... lengthN(tf)
+this matrix can be read by the XYTL class for analysis in the .m files provided.
+the script also creates text files containing the values of each pixel in the stigmergy grid 
+the frequency of data recording can be set by changing d_rec
+*/
 #include <cstdlib>
 #include <algorithm>
 #include <random>
@@ -34,7 +46,7 @@ int main(int argc, const char * argv[]) {
     
     double mean_reversal_period = 1000;//need to tune this for WT behavior
     
-    double P = 0.1;
+    double P = 0.1; // attachment probability, set P = 0 for nonmotile case
 
     
     
@@ -100,12 +112,12 @@ int main(int argc, const char * argv[]) {
     double retraction_period = 10;
     
     //normal_distribution<double> T_rev_dist(mean_reversal_period, stdev_reversal_period);
-    
-    double T_rev_max = mean_reversal_period * 2; //+ 4 * stdev_reversal_period;
+    // this version of the code used a uniform distribution of reversal frequencies
+    double T_rev_max = mean_reversal_period * 2; //+ 4 * stdev_reversal_period; 
     double T_rev_min = 0.0;
     double T_rev;
     
-    double P_attach_particle = 0;//difficult to estimate
+    double P_attach_particle = 0; // pilus cross-linking is disabled
     int N = 1;
     int N_new = 0;
     
@@ -193,8 +205,8 @@ int main(int argc, const char * argv[]) {
         double l = l_min + rng() * (l_max - l_min);
         
         
-        T_rev = rng() * T_rev_max;
-        //while (T_rev < T_rev_min || T_rev > T_rev_max)
+        T_rev = rng() * T_rev_max; // uniform distribution
+        //while (T_rev < T_rev_min || T_rev > T_rev_max) // gaussian distribution
         //{T_rev = T_rev_dist(generator);}
         
         Particle p(x, y, l, phi, theta, retraction_period, T_rev, l_pil, F_p, i,
